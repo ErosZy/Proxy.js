@@ -16,10 +16,7 @@
     }
 
 }("Proxy",function(){
-
     var splice = Array.prototype.splice;
-
-    //1.将方法添加在原型上可以减少内存开销
 
     function Proxy(){
 
@@ -44,7 +41,6 @@
         }
 
         len = arr.length;
-
 
         for(var i = 0; i < len ; i++){
             var item = arr[i];
@@ -92,12 +88,11 @@
 
         while(both--){
 
-            if(both == 1){
+            if(both){
                 for(var i = _proxy.length - 1; i >= 0; i--){
                     _proxy[i].apply(self,[eventName,data]);
                     splice.apply(_proxy,[i,1]);
                 }
-
             }else{
                 for(var i = _all.length - 1 ; i >= 0 ; i--){
                     var flag = _all[i].apply(self);
@@ -167,12 +162,8 @@
     }
 
     Proxy.prototype._is = function(obj,type){
-        return self = this;
-
         return Object.prototype.toString.call(obj) == "[object "+ type +"]";
     }
-
-
 
     return Proxy;
 }));
