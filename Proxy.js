@@ -103,6 +103,8 @@
         var self = this;
 
         self._assign.apply(self,arguments);
+
+        return self;
     }
 
     /**
@@ -146,6 +148,8 @@
                 }
             }
         }
+
+        return self;
     }
 
     /**
@@ -161,6 +165,8 @@
         }else{
             self.removeListener(eventName);
         }
+
+        return self;
     }
 
     /**
@@ -184,6 +190,8 @@
         };
 
         self._assign(arr,fn);
+
+        return self;
     }
 
     /**
@@ -208,10 +216,14 @@
                 }
             }else{
                 for(var i = _all.length - 1 ; i >= 0 ; i--){
-                    _all[i].callback.apply(self);
+                    if(self._inArray(eventName,_all[i].binds) != -1){
+                        _all[i].callback.apply(self);
+                    }
                 }
             }
         }
+
+        return self;
     }
 
     /**
@@ -225,6 +237,8 @@
         later(function(){
             self.emit(eventName,data);
         },0);
+
+        return self;
     }
 
     /**
@@ -241,6 +255,8 @@
         }
 
         self.once(arr,callback);
+
+        return self;
     }
 
     /**
@@ -269,6 +285,8 @@
             item = arr[i];
             self.emit(arr[i],data[i]);
         }
+
+        return self;
     }
 
     /**
@@ -282,10 +300,12 @@
             self.removeAllListeners();
             callback.call(self,err);
         });
+
+        return self;
     }
 
     /**
-     *
+     * 整体触发一次后，之后每一项分别可以触发一次原有回调
      * @param arr
      * @param callback
      */
@@ -306,30 +326,44 @@
                 }(arr[i]))
             }
         })
+
+        return self;
     }
 
     Proxy.prototype.after = function(){
+        var self = this;
 
+        return self;
     }
 
     Proxy.prototype.group = function(){
+        var self = this;
 
+        return self;
     }
 
     Proxy.prototype.any = function(){
+        var self = this;
 
+        return self;
     }
 
     Proxy.prototype.not = function(){
+        var self = this;
 
+        return self;
     }
 
     Proxy.prototype.done = function(){
+        var self = this;
 
+        return self;
     }
 
     Proxy.prototype.doneLater = function(){
+        var self = this;
 
+        return self;
     }
 
     /**
