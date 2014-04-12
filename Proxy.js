@@ -46,13 +46,13 @@
             count = 0,
             params = {},
             reg = /\s+/g,
-            _fnStr;
+            _fnStr = callback.toString();
 
         arr = self._makeArray(arr);
 
         len = arr.length;
 
-        _fnStr = callback.replace(reg,'');
+        _fnStr = _fnStr.replace(reg,'');
 
         for(var i = 0; i < len ; i++){
             var item = arr[i];
@@ -146,8 +146,7 @@
     Proxy.prototype.removeListener = function(eventName,callback){
         var self = this,
             len = arguments.length,
-            fnStr = callback.replace(/\s+/g,''),
-            _binds,fn,item,_all;
+            fnStr,_binds,fn,item,_all;
 
         //删除所有回调事件
         if(!len){
@@ -157,11 +156,13 @@
             //删除对应事件的所有回调
             _binds = self._binds[eventName];
             for(var i = 0 ,len = _binds.length; i < len; i++){
-                fn = _binds.callback;
+                fn = _binds[i].callback;
                 self.removeListener(eventName,fn);
             }
         }else{
             //删除对应事件所有回调，并且找到对应的回调进行删除
+            fnStr = callback.toString().replace(/\s+/g,'');
+
             _binds = self._binds[eventName];
             _all = self._callbacks;
 
@@ -169,8 +170,8 @@
                 item = _binds[i];
                 if(item.fnStr == fnStr){
                     splice.call(_binds,[i,1]);
-                    for(var j = _all.length; j >= 0; j--){
-                        if(_all[j].fnStr == fnStr && self._inArray(eventName,_all[i].binds)){
+                    for(var j = _all.length - 1; j >= 0; j--){
+                        if(_all[j].fnStr == fnStr && self._inArray(eventName,_all[i].binds) != -1){
                             splice.call(_all,[i,1]);
                             continue loop;
                         }
@@ -248,7 +249,7 @@
         arr = self._makeArray(arr);
 
         fn = function(){
-            callback.apply(self);
+            callback.apply(self,arguments);
 
             for(var i = 0, len = arr.length ; i < len ; i++){
                 var item = arr[i];
