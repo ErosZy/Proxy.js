@@ -87,7 +87,6 @@
         }
 
         while(both--){
-
             if(both){
                 for(var i = _proxy.length - 1; i >= 0; i--){
                     _proxy[i].apply(self,[eventName,data]);
