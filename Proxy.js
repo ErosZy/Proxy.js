@@ -36,11 +36,11 @@
     }
 
     /**
-     * all方法
-     * @param arr 事件名数组
-     * @param callback 所有事件完成后的回调函数
+     * 注册事件
+     * @param ev 事件名
+     * @param callback 回调函数
      */
-    Proxy.prototype.all = function(arr,callback){
+    Proxy.prototype.addListener = function(arr,callback){
         var self = this,
             len = 0,
             count = 0,
@@ -95,6 +95,30 @@
     }
 
     /**
+     * 一次触发事件
+     * @param arr
+     * @param callback
+     */
+    Proxy.prototype.once = function(arr,callback){
+        var self = this,
+            fn;
+
+        arr = self._makeArray(arr);
+
+        fn = function(){
+            callback.apply(self,arguments);
+
+            for(var i = 0, len = arr.length ; i < len ; i++){
+                var item = arr[i];
+                self.removeListener(item,fn);
+            }
+
+        };
+
+        self.addListener(arr,fn);
+    }
+
+    /**
      * 触发对应的事件
      * @param eventName 触发的事件名
      * @param data 传入的参数
@@ -120,22 +144,6 @@
                 }
             }
         }
-    }
-
-    /**
-     * 注册事件
-     * @param ev 事件名
-     * @param callback 回调函数
-     */
-    Proxy.prototype.addListener = function(eventName,callback){
-        var self = this,
-            len = arguments.length;
-
-        if(len < 2){
-            return;
-        }
-
-        self.all([eventName],callback);
     }
 
     /**
@@ -210,6 +218,22 @@
     }
 
     /**
+     * all方法
+     * @param arr 事件名数组
+     * @param callback 所有事件完成后的回调函数
+     */
+    Proxy.prototype.all = function(arr,callback){
+        var self = this,
+            len = arguments.length;
+
+        if(len < 2){
+            return;
+        }
+
+        self.once(arr,callback);
+    }
+
+    /**
      * 注册事件后立即触发
      * @param arr
      * @param callback
@@ -229,7 +253,7 @@
 
         arr = self._makeArray(arr);
 
-        self.all(arr,callback);
+        self.once(arr,callback);
 
         for(var i = 0 , len = arr.length ; i < len ; i++){
             item = arr[i];
@@ -238,36 +262,42 @@
     }
 
     /**
-     * 一次触发事件
+     * 错误事件的封装
+     * @param errHandler
+     */
+    Proxy.prototype.fail = function(callback){
+        var self = this;
+
+        self.once("error",function(err){
+            self.removeAllListeners();
+            callback.call(self,err);
+        });
+    }
+
+    /**
+     *
      * @param arr
      * @param callback
      */
-    Proxy.prototype.once = function(arr,callback){
-        var self = this,
-            fn;
+    Proxy.prototype.tail = function(arr,callback){
+        var self = this;
 
         arr = self._makeArray(arr);
 
-        fn = function(){
+        self.once(arr,function(){
+
             callback.apply(self,arguments);
 
-            for(var i = 0, len = arr.length ; i < len ; i++){
-                var item = arr[i];
-                self.removeListener(item,fn);
+            for(var i = 0, len = arr.length; i < len;i++){
+                (function(item){
+                    later(function(){
+                        self.once(item,function(){
+                            callback.apply(self,arguments);
+                        });
+                    },0);
+                }(arr[i]))
             }
-
-        };
-
-        self.all(arr,fn);
-    }
-
-
-    Proxy.prototype.fail = function(){
-
-    }
-
-    Proxy.prototype.tail = function(){
-
+        })
     }
 
     Proxy.prototype.after = function(){
@@ -329,7 +359,7 @@
         var self = this;
 
         if(!self._is(arr,"Array")){
-            arr = [].push(arr);
+            arr = [arr];
         }else{
             arr = [].concat.apply([],arr);
         }
