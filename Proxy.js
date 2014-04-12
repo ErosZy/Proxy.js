@@ -237,15 +237,29 @@
     }
 
     /**
-     * 事件一次触发
+     * 一次触发事件
+     * @param arr
+     * @param callback
      */
     Proxy.prototype.once = function(arr,callback){
-        var self = this;
+        var self = this,
+            fn;
 
         arr = self._makeArray(arr);
 
+        fn = function(){
+            callback.apply(self);
 
+            for(var i = 0, len = arr.length ; i < len ; i++){
+                var item = arr[i];
+                self.removeListener(item,fn);
+            }
+
+        };
+
+        self.all(arr,fn);
     }
+
 
     Proxy.prototype.fail = function(){
 
