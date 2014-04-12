@@ -321,8 +321,8 @@
 
     /**
      * 工具函数，生成数据
-     * @param arr 传入参数
-     * @returns {Array} 返回数组
+     * @param arr
+     * @returns {Array}
      * @private
      */
     Proxy.prototype._makeArray = function(arr){
@@ -339,9 +339,9 @@
 
     /**
      * 工具函数，进行类型判断
-     * @param obj 判断对象
-     * @param type 类型
-     * @returns {boolean} 是否符合判断类型
+     * @param obj
+     * @param type
+     * @returns {boolean}
      * @private
      */
     Proxy.prototype._is = function(obj,type){
