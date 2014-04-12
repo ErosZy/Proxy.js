@@ -40,22 +40,29 @@
      * @param ev 事件名
      * @param callback 回调函数
      */
-    Proxy.prototype.addListener = function(eventName,callback,arr){
+    Proxy.prototype.addListener = function(arr,callback){
         var self = this,
             len = 0,
-            count = self._is(arr,"Array") ? arr.length : 0,
+            count = 0,
             params = {},
             reg = /\s+/g,
             _fnStr = callback.toString();
 
+        arr = self._makeArray(arr);
+
+        len = arr.length;
+
         _fnStr = _fnStr.replace(reg,'');
 
-        self._binds[eventName] = self._binds[eventName] ? self._binds[eventName] : [];
-        self._binds[eventName].push({
-            callback : callback,
-            fnStr : _fnStr,
-            bind : _bind
-        });
+        for(var i = 0; i < len ; i++){
+            var item = arr[i];
+            self._binds[item] = self._binds[item] ? self._binds[item] : [];
+            self._binds[item].push({
+                callback : callback,
+                fnStr : _fnStr,
+                bind : _bind
+            });
+        }
 
         self._callbacks.push({
             fnStr : _fnStr,
@@ -108,9 +115,7 @@
 
         };
 
-        for(var i = 0,len = arr.length; i < len; i++){
-            self.addListener(arr[i],fn,arr);
-        }
+        self.addListener(arr,fn);
     }
 
     /**
@@ -213,9 +218,9 @@
     }
 
     /**
-     * all方法
-     * @param arr 事件名数组
-     * @param callback 所有事件完成后的回调函数
+     * all函数，所有事件触发后才会被触发
+     * @param ev 事件名
+     * @param callback 回调函数
      */
     Proxy.prototype.all = function(arr,callback){
         var self = this,
