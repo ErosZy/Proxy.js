@@ -237,9 +237,13 @@
     }
 
     /**
-     *
+     * 事件一次触发
      */
-    Proxy.prototype.once = function(){
+    Proxy.prototype.once = function(arr,callback){
+        var self = this;
+
+        arr = self._makeArray(arr);
+
 
     }
 
@@ -275,6 +279,13 @@
 
     }
 
+    /**
+     * 工具函数，判断对象是否在数组中
+     * @param item
+     * @param arr
+     * @returns {number}
+     * @private
+     */
     Proxy.prototype._inArray = function(item,arr){
         var self = this,
             index = -1;
@@ -293,6 +304,12 @@
         return index;
     }
 
+    /**
+     * 工具函数，生成数据
+     * @param arr 传入参数
+     * @returns {Array} 返回数组
+     * @private
+     */
     Proxy.prototype._makeArray = function(arr){
         var self = this;
 
@@ -305,6 +322,13 @@
         return arr;
     }
 
+    /**
+     * 工具函数，进行类型判断
+     * @param obj 判断对象
+     * @param type 类型
+     * @returns {boolean} 是否符合判断类型
+     * @private
+     */
     Proxy.prototype._is = function(obj,type){
         return Object.prototype.toString.call(obj) == "[object "+ type +"]";
     }
