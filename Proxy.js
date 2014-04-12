@@ -40,7 +40,7 @@
      * @param ev 事件名
      * @param callback 回调函数
      */
-    Proxy.prototype.addListener = function(arr,callback){
+    Proxy.prototype._assign = function(arr,callback){
         var self = this,
             len = 0,
             count = 0,
@@ -95,55 +95,14 @@
     }
 
     /**
-     * 一次触发事件
-     * @param arr
+     * 添加事件
+     * @param eventName
      * @param callback
      */
-    Proxy.prototype.once = function(arr,callback){
-        var self = this,
-            fn;
+    Proxy.prototype.addListener = function(eventName,callback){
+        var self = this;
 
-        arr = self._makeArray(arr);
-
-        fn = function(){
-            callback.apply(self,arguments);
-
-            for(var i = 0, len = arr.length ; i < len ; i++){
-                var item = arr[i];
-                self.removeListener(item,fn);
-            }
-
-        };
-
-        self.addListener(arr,fn);
-    }
-
-    /**
-     * 触发对应的事件
-     * @param eventName 触发的事件名
-     * @param data 传入的参数
-     */
-    Proxy.prototype.emit = function(eventName,data){
-        var self = this,
-            both = 2,
-            _proxy = self._binds[eventName],
-            _all = self._callbacks;
-
-        if(!_proxy){
-            return;
-        }
-
-        while(both--){
-            if(both){
-                for(var i = _proxy.length - 1; i >= 0; i--){
-                    _proxy[i].bind.apply(self,[eventName,data]);
-                }
-            }else{
-                for(var i = _all.length - 1 ; i >= 0 ; i--){
-                    _all[i].callback.apply(self);
-                }
-            }
-        }
+        self._assign.apply(self,arguments);
     }
 
     /**
@@ -179,8 +138,8 @@
                 if(item.fnStr == fnStr){
                     splice.call(_binds,[i,1]);
                     for(var j = _all.length - 1; j >= 0; j--){
-                        if(_all[j].fnStr == fnStr && self._inArray(eventName,_all[i].binds) != -1){
-                            splice.call(_all,[i,1]);
+                        if(_all[j].fnStr == fnStr && self._inArray(eventName,_all[j].binds) != -1){
+                            splice.apply(_all,[j,1]);
                             continue loop;
                         }
                     }
@@ -201,6 +160,57 @@
             self.removeListener();
         }else{
             self.removeListener(eventName);
+        }
+    }
+
+    /**
+     * 一次触发事件
+     * @param arr
+     * @param callback
+     */
+    Proxy.prototype.once = function(arr,callback){
+        var self = this,
+            fn;
+
+        arr = self._makeArray(arr);
+
+        fn = function(){
+            callback.apply(self,arguments);
+
+            for(var i = 0, len = arr.length ; i < len ; i++){
+                self.removeListener(arr[i],fn);
+            }
+
+        };
+
+        self._assign(arr,fn);
+    }
+
+    /**
+     * 触发对应的事件
+     * @param eventName 触发的事件名
+     * @param data 传入的参数
+     */
+    Proxy.prototype.emit = function(eventName,data){
+        var self = this,
+            both = 2,
+            _proxy = self._binds[eventName],
+            _all = self._callbacks;
+
+        if(!_proxy){
+            return;
+        }
+
+        while(both--){
+            if(both){
+                for(var i = _proxy.length - 1; i >= 0; i--){
+                    _proxy[i].bind.apply(self,[eventName,data]);
+                }
+            }else{
+                for(var i = _all.length - 1 ; i >= 0 ; i--){
+                    _all[i].callback.apply(self);
+                }
+            }
         }
     }
 
@@ -291,9 +301,7 @@
             for(var i = 0, len = arr.length; i < len;i++){
                 (function(item){
                     later(function(){
-                        self.once(item,function(){
-                            callback.apply(self,arguments);
-                        });
+                        self.once(item,callback);
                     },0);
                 }(arr[i]))
             }
