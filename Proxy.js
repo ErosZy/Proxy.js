@@ -78,19 +78,26 @@
             }
         }
 
-        function _all(){
-            var tmp = [];
+        function _all(eventName,data,index){
+            var dataArr = [],
+                all;
 
             if(count < len){
-                return;
+                return false;
+            }
+
+            all = self._callbacks[index];
+
+            if(self._inArray(eventName,all.binds) == -1){
+                return false;
             }
 
             for(var i = 0; i < len ; i++){
                 var key = arr[i];
-                tmp.push(params[key]);
+                dataArr.push(params[key]);
             }
 
-            callback.apply(self,tmp);
+            callback.apply(self,dataArr);
         }
     }
 
@@ -202,12 +209,8 @@
     Proxy.prototype.emit = function(eventName,data){
         var self = this,
             both = 2,
-            _proxy = self._binds[eventName],
+            _proxy = self._binds[eventName] || [],
             _all = self._callbacks;
-
-        if(!_proxy){
-            return;
-        }
 
         while(both--){
             if(both){
@@ -216,9 +219,7 @@
                 }
             }else{
                 for(var i = _all.length - 1 ; i >= 0 ; i--){
-                    if(self._inArray(eventName,_all[i].binds) != -1){
-                        _all[i].callback.apply(self);
-                    }
+                    _all[i].callback.apply(self,[eventName,data,i]);
                 }
             }
         }
@@ -330,38 +331,147 @@
         return self;
     }
 
-    Proxy.prototype.after = function(){
-        var self = this;
+    /**
+     * 事件被触发times次后callback触发，触发一次
+     * @param eventName
+     * @param times
+     * @param callback
+     * @returns {Proxy}
+     */
+    Proxy.prototype.after = function(eventName,times,callback){
+        var self = this,
+            len = arguments.length,
+            count = 0,
+            dataArr = [],
+            reg = /\s+/g,
+            _binds = self._binds,
+            _fnStr;
+
+        if(len < 3 || !self._is(callback,"Function")){
+            return self;
+        }
+
+        _fnStr = callback.toString().replace(reg,'');
+
+        _binds[eventName] = _binds[eventName] ? _binds[eventName] : [];
+
+        _binds[eventName].push({
+            callback : callback,
+            fnStr : _fnStr,
+            bind : _bind
+        });
+
+        self._callbacks.push({
+            fnStr : _fnStr,
+            binds : [eventName],
+            callback:_all
+        });
+
+        function _bind(eventName,data){
+            count++;
+
+            if(data){
+                dataArr.push(data);
+            }
+        }
+
+        function _all(eventName,data,index){
+            var all;
+
+            if(count < times){
+                return false;
+            }
+
+            all = self._callbacks[index];
+
+            if(self._inArray(eventName,all.binds) == -1){
+                return false;
+            }
+
+            callback.call(self,dataArr);
+
+            self.removeListener(eventName,callback);
+        }
 
         return self;
     }
 
-    Proxy.prototype.group = function(){
-        var self = this;
+    /**
+     * 注册事件中任一事件被触发，则触发回调
+     * @param arr
+     * @param callback
+     * @returns {Proxy}
+     */
+    Proxy.prototype.any = function(arr,callback){
+        var self = this,
+            len = arguments.length,
+            reg = /\s+/g,
+            _fnStr;
+
+        if(len < 2){
+            return false;
+        }
+
+        arr = self._makeArray(arr);
+
+        _fnStr = callback.toString().replace(reg,'');
+
+        self._callbacks.push({
+            fnStr : _fnStr,
+            binds : arr,
+            callback:_all
+        });
+
+        function _all(eventName,data,index){
+            var all = self._callbacks[index];
+
+            if(self._inArray(eventName,all.binds) == -1){
+                return false;
+            }
+
+            callback.call(self,data);
+            splice.apply(self._callbacks,[index,1]);
+        }
 
         return self;
     }
 
-    Proxy.prototype.any = function(){
-        var self = this;
+    /**
+     * 若不为注册的事件，那么就触发callback回调
+     * @param arr
+     * @param callback
+     * @returns {Proxy}
+     */
+    Proxy.prototype.not = function(arr,callback){
+        var self = this,
+            len = arguments.length,
+            reg = /\s+/g,
+            _fnStr;
 
-        return self;
-    }
+        if(len < 2){
+            return false;
+        }
 
-    Proxy.prototype.not = function(){
-        var self = this;
+        arr = self._makeArray(arr);
 
-        return self;
-    }
+        _fnStr = callback.toString().replace(reg,'');
 
-    Proxy.prototype.done = function(){
-        var self = this;
+        self._callbacks.push({
+            fnStr : _fnStr,
+            binds : arr,
+            callback:_all
+        });
 
-        return self;
-    }
+        function _all(eventName,data,index){
+            var all = self._callbacks[index];
 
-    Proxy.prototype.doneLater = function(){
-        var self = this;
+            if(self._inArray(eventName,all.binds) != -1){
+                return false;
+            }
+
+            callback.call(self,data);
+            splice.apply(self._callbacks,[index,1]);
+        }
 
         return self;
     }
