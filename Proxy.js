@@ -523,43 +523,6 @@
         return arr;
     }
 
-
-    Proxy.prototype._equal = function(a1,a2){
-        var self = this;
-
-        if(a1.length != a2.length){
-            return false;
-        }
-
-        self._every(a1,function(item,index,arr){
-            if(self._inArray(item,a2) != -1){
-                return true;
-            }else{
-                return false;
-            }
-        });
-    }
-
-
-    Proxy.prototype._every = function(arr,fn){
-        var self = this;
-
-        arr = self._makeArray(arr);
-
-        if(every){
-            return every.call(arr,fn);
-        }else{
-            for(var i = 0,len = arr.length; i < len; i++){
-                var flag = fn.call(self);
-                if(!flag){
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
     /**
      * 工具函数，进行类型判断
      * @param obj
