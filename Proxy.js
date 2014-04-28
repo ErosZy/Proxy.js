@@ -491,7 +491,7 @@
         var self = this,
             index = -1;
 
-        if([].indexOf){
+        if(indexOf){
             return indexOf.call(arr,item);
         }else{
             for(var i = 0, len = arr.length ; i < len ; i++){
