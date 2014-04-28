@@ -18,6 +18,7 @@
 }("Proxy",function(){
     var splice = Array.prototype.splice,
         indexOf = Array.prototype.indexOf,
+        every = Array.prototype.every,
         later = typeof process != "undefined" ? process.nextTick : setTimeout;
 
     /**
@@ -60,6 +61,7 @@
             self._binds[item].push({
                 callback : callback,
                 fnStr : _fnStr,
+                proxy : arr,
                 bind : _bind
             });
         }
@@ -145,9 +147,11 @@
             loop:for(var i = _binds.length - 1; i >= 0 ; i--){
                 item = _binds[i];
                 if(item.fnStr == fnStr){
-                    splice.call(_binds,[i,1]);
+                    splice.apply(_binds,[i,1]);
                     for(var j = _all.length - 1; j >= 0; j--){
-                        if(_all[j].fnStr == fnStr && self._inArray(eventName,_all[j].binds) != -1){
+                        if(_all[j].fnStr == fnStr &&
+                            self._inArray(eventName,_all[j].binds) != -1
+                          ){
                             splice.apply(_all,[j,1]);
                             continue loop;
                         }
@@ -517,6 +521,43 @@
         }
 
         return arr;
+    }
+
+
+    Proxy.prototype._equal = function(a1,a2){
+        var self = this;
+
+        if(a1.length != a2.length){
+            return false;
+        }
+
+        self._every(a1,function(item,index,arr){
+            if(self._inArray(item,a2) != -1){
+                return true;
+            }else{
+                return false;
+            }
+        });
+    }
+
+
+    Proxy.prototype._every = function(arr,fn){
+        var self = this;
+
+        arr = self._makeArray(arr);
+
+        if(every){
+            return every.call(arr,fn);
+        }else{
+            for(var i = 0,len = arr.length; i < len; i++){
+                var flag = fn.call(self);
+                if(!flag){
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     /**
