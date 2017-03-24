@@ -1,38 +1,38 @@
 Proxy.js
 ======
 
-#1.简介
+# 1.简介
 Proxy.js -- 简单的eventProxy异步转同步库
 
 
-#2.兼容性
+# 2.兼容性
 
 IE6+、Chrome、Firefox、Safari、Opera等浏览器
 
-#3.使用
+# 3.使用
 
-###3.1：创建对象
+### 3.1：创建对象
 ```
     var proxy = new Proxy(); // or var proxy = Proxy();
 ```
 
-###3.2：API
+### 3.2：API
 
-####all:
+#### all:
 ```
 	proxy.all([eventName...],function(evData1,evData2){
 		//...
 	})
 ```
 
-####addListener:
+#### addListener:
 ```
 	proxy.addListner(eventName,function(data){
 		//..
 	})
 ```
 
-####removeListener:
+#### removeListener:
 ```
 	proxy.removeListener();
 	
@@ -44,66 +44,66 @@ IE6+、Chrome、Firefox、Safari、Opera等浏览器
 ```
 
 
-####removeAllListeners:
+#### removeAllListeners:
 ```
 	proxy.removeAllListeners(eventName);
 	
 	proxy.removeAllListener();
 ```
 
-####once:
+#### once:
 ```
 	proxy.once(eventName,function(data){
 		//...
 	})
 ```
 
-####emit:
+#### emit:
 ```
 	proxy.emit(eventName,data);
 ```
 
 
-####emitLater:
+#### emitLater:
 ```
 	proxy.emitLater(eventName,data);
 ```
 
-####immediate:
+#### immediate:
 ```
 	proxy.immediate(eventName,data);
 ```
 
 
-####fail:
+#### fail:
 ```
 	proxy.fail(function(data){
 		//...
 	})
 ```
 
-####tail:
+#### tail:
 ```
 	proxy.tail([eventName...],function(data){
 		//...
 	})
 ```
 
-####after:
+#### after:
 ```
 	proxy.after(eventName,times,function(data){
 		//...
 	})
 ```
 
-####any:
+#### any:
 ```
 	proxy.any([eventName..],function(data){
 		//...
 	})
 ```
 
-####not:
+#### not:
 ```
 	proxy.not([eventName..],function(data){
 		//...
